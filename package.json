@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"xlsx-cli": "latest"
+	}
+}
