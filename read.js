@@ -1,5 +1,5 @@
 import * as XLSX from './xlsx.mjs';
 
-const filename = Deno.args[0];
-const filedata = Deno.readFileSync(filename);
+const filename = Bun.argv.at(-1);
+const filedata = Bun.fs().readFileSync(filename);
 const workbook = XLSX.read(filedata, {WTF: true, dense: true});

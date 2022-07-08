@@ -2,7 +2,8 @@
 npm i
 node --version
 deno --version
+bun --version
 for F in large_strings.*; do
 	echo "$F"
-	hyperfine -w 3 "node node_modules/xlsx-cli/bin/xlsx.njs --dev --all --read $F" "deno run --allow-read read.ts $F"
+	hyperfine -w 3 "node read.mjs $F" "deno run --allow-read read.ts $F" "bun run read.js $F"
 done
