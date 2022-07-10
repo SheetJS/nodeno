@@ -1,8 +1,9 @@
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
 /* vim: set ts=2: */
 /*exported XLSX */
-/*global process:false, Buffer:false, ArrayBuffer:false, DataView:false, Deno:false */
+/*global global, exports, module, require:false, process:false, Buffer:false, ArrayBuffer:false, DataView:false, Deno:false */
 var XLSX = {};
+function make_xlsx_lib(XLSX){
 XLSX.version = '0.18.9';
 var current_codepage = 1200, current_ansi = 1252;
 /*:: declare var cptable:any; */
@@ -4239,6 +4240,10 @@ function encode_range_xls(r, opts)/*:string*/ {
 		}
 	}
 	return encode_cell_xls(r.s, opts.biff) + ":" + encode_cell_xls(r.e, opts.biff);
+}
+if(typeof cptable !== 'undefined') set_cptable(cptable);
+else if(typeof module !== "undefined" && typeof require !== 'undefined') {
+	set_cptable(require('./dist/cpexcel.js'));
 }
 function decode_row(rowstr/*:string*/)/*:number*/ { return parseInt(unfix_row(rowstr),10) - 1; }
 function encode_row(row/*:number*/)/*:string*/ { return "" + (row + 1); }
@@ -25767,23 +25772,32 @@ var __stream = {
 	to_csv: write_csv_stream,
 	set_readable: set_readable
 };
-export const version = XLSX.version;
-export {
-	parse_xlscfb,
-	parse_zip,
-	readSync as read,
-	readFileSync as readFile,
-	readFileSync,
-	writeSync as write,
-	writeFileSync as writeFile,
-	writeFileSync,
-	writeFileAsync,
-	writeSyncXLSX as writeXLSX,
-	writeFileSyncXLSX as writeFileXLSX,
-	utils,
-	set_fs,
-	set_cptable,
-	__stream as stream,
-	SSF,
-	CFB
-};
+if(typeof parse_xlscfb !== "undefined") XLSX.parse_xlscfb = parse_xlscfb;
+XLSX.parse_zip = parse_zip;
+XLSX.read = readSync; //xlsread
+XLSX.readFile = readFileSync; //readFile
+XLSX.readFileSync = readFileSync;
+XLSX.write = writeSync;
+XLSX.writeFile = writeFileSync;
+XLSX.writeFileSync = writeFileSync;
+XLSX.writeFileAsync = writeFileAsync;
+XLSX.utils = utils;
+XLSX.writeXLSX = writeSyncXLSX;
+XLSX.writeFileXLSX = writeFileSyncXLSX;
+XLSX.SSF = SSF;
+if(typeof __stream !== "undefined") XLSX.stream = __stream;
+if(typeof CFB !== "undefined") XLSX.CFB = CFB;
+if(typeof require !== "undefined") {
+  var strmod = require('stream');
+  if((strmod||{}).Readable) set_readable(strmod.Readable);
+	try { _fs = require('fs'); } catch(e) {}
+}
+}
+/*global define */
+/*:: declare var define:any; */
+if(typeof exports !== 'undefined') make_xlsx_lib(exports);
+else if(typeof module !== 'undefined' && module.exports) make_xlsx_lib(module.exports);
+else if(typeof define === 'function' && define.amd) define('xlsx', function() { if(!XLSX.version) make_xlsx_lib(XLSX); return XLSX; });
+else make_xlsx_lib(XLSX);
+/* NOTE: the following extra line is needed for "Lightning Locker Service" */
+if(typeof window !== 'undefined' && !window.XLSX) try { window.XLSX = XLSX; } catch(e) {}
